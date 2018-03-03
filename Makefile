@@ -1,17 +1,17 @@
 # Must follow the format in the Naming section of https://vcvrack.com/manual/PluginDevelopmentTutorial.html
-SLUG = Template
+SLUG = VSynth
 
 # Must follow the format in the Versioning section of https://vcvrack.com/manual/PluginDevelopmentTutorial.html
 VERSION = 0.5.0
 
 # FLAGS will be passed to both the C and C++ compiler
 FLAGS +=
-CFLAGS +=
+CFLAGS += `pkg-config --cflags opencv`
 CXXFLAGS +=
 
 # Careful about linking to shared libraries, since you can't assume much about the user's environment and library search path.
 # Static libraries are fine.
-LDFLAGS +=
+LDFLAGS += `pkg-config --libs opencv`
 
 # Add .cpp and .c files to the build
 SOURCES += $(wildcard src/*.cpp)

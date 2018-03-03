@@ -1,8 +1,9 @@
-#include "Template.hpp"
-
+#include "vsynth.hpp"
 
 // The plugin-wide instance of the Plugin class
 Plugin *plugin;
+
+std::unordered_map<float, Module*> output_refs;
 
 void init(rack::Plugin *p) {
 	plugin = p;
@@ -16,7 +17,8 @@ void init(rack::Plugin *p) {
 	p->manual = "https://github.com/VCVRack/Template/blob/master/README.md";
 
 	// For each module, specify the ModuleWidget subclass, manufacturer slug (for saving in patches), manufacturer human-readable name, module slug, and module name
-	p->addModel(createModel<MyModuleWidget>("Template", "MyModule", "My Module", OSCILLATOR_TAG));
+	p->addModel(createModel<ImageSourceWidget>("VSynth", "ImageSource", "Image Source", OSCILLATOR_TAG));
+	p->addModel(createModel<PlainViewerWidget>("VSynth", "PlainViewer", "Plain Viewer", OSCILLATOR_TAG));
 
 	// Any other plugin initialization may go here.
 	// As an alternative, consider lazy-loading assets and lookup tables when your module is created to reduce startup times of Rack.
