@@ -3,8 +3,6 @@
 // The plugin-wide instance of the Plugin class
 Plugin *plugin;
 
-std::unordered_map<float, Module*> output_refs;
-
 void init(rack::Plugin *p) {
 	plugin = p;
 	// The "slug" is the unique identifier for your plugin and must never change after release, so choose wisely.
@@ -16,10 +14,11 @@ void init(rack::Plugin *p) {
 	p->website = "https://github.com/VCVRack/Template";
 	p->manual = "https://github.com/VCVRack/Template/blob/master/README.md";
 
-	// For each module, specify the ModuleWidget subclass, manufacturer slug (for saving in patches), manufacturer human-readable name, module slug, and module name
-	p->addModel(createModel<ImageSourceWidget>("VSynth", "ImageSource", "Image Source", OSCILLATOR_TAG));
-	p->addModel(createModel<PlainViewerWidget>("VSynth", "PlainViewer", "Plain Viewer", OSCILLATOR_TAG));
+	p->addModel(modelImageSource);
+	p->addModel(modelPlainViewer);
 
+	// For each module, specify the ModuleWidget subclass, manufacturer slug (for saving in patches), manufacturer human-readable name, module slug, and module name
 	// Any other plugin initialization may go here.
 	// As an alternative, consider lazy-loading assets and lookup tables when your module is created to reduce startup times of Rack.
 }
+

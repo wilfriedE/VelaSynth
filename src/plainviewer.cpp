@@ -3,50 +3,77 @@
 /**
  	A Module for viewing things
  **/
-struct  PlainViewer : Viewer {
+struct PlainViewer : Module {
+	enum ParamIds {
+		NUM_PARAMS
+	};
+	enum InputIds {
+		SRC_INPUT,
+		NUM_INPUTS
+	};
+	enum OutputIds {
+		REF_OUTPUT,
+		NUM_OUTPUTS
+	};
+	enum LightIds {
+		NUM_LIGHTS
+	};
+	
+	int texture; // empty image base
+
+	PlainViewer() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {};
 	void step() override;
-
-	void update() override;
-
-	SpriteWidget *preview(Vec pos) override;
 };
-
 
 void PlainViewer::step() {
-	updateSrcInput(inputs[SRC_INPUT].value); // Check Source input and if source input is ref to new source then update
+	// Keep textures in sync
+	texture = (int) inputs[SRC_INPUT].value;
+	outputs[REF_OUTPUT].value = (float) texture;
 };
 
-void PlainViewer::update() {
-	if(media_source != NULL){
-		cv::resize(media_source->imgFrame, imgFrame, cv::Size(480, 380));
-		frameToImage();
+
+struct ViewerDisplay : SpriteWidget {
+	PlainViewer *module;
+
+	ViewerDisplay() {};
+
+	void draw(NVGcontext *vg)  override;
+};
+
+void ViewerDisplay::draw(NVGcontext *vg) {
+	int width, height;
+	nvgImageSize(vg, module->texture, &width, &height);
+	int stride = width / spriteSize.x;
+	if (stride == 0) {
+		warn("Size of SpriteWidget is %d, %d but spriteSize is %f, %f", width, height, spriteSize.x, spriteSize.y);
+		return;
 	}
-	updateViewers();
-}
-
-SpriteWidget *PlainViewer::preview(Vec pos) {
-	SpriteWidget *view = new SpriteWidget();
-	view->spriteOffset = pos;
-	view->spriteSize = Vec(380, 480);
-	view->spriteImage = image;
-	return view;
+	Vec offset = Vec((index % stride) * spriteSize.x, (index / stride) * spriteSize.y);
+	NVGpaint paint = nvgImagePattern(vg, spriteOffset.x - offset.x, spriteOffset.y - offset.y, width, height, 0.0,  module->texture, 1.0);
+	nvgFillPaint(vg, paint);
+	nvgBeginPath(vg);
+	nvgRect(vg, spriteOffset.x, spriteOffset.y, spriteSize.x, spriteSize.y);
+	nvgFill(vg);
 };
 
-PlainViewerWidget::PlainViewerWidget() {
-	PlainViewer *module = new PlainViewer();
-	setModule(module);
+struct PlainViewerWidget : ModuleWidget {
+	PlainViewerWidget(PlainViewer *module);
+};
+
+PlainViewerWidget::PlainViewerWidget(PlainViewer *module) : ModuleWidget(module) {
+	setPanel(SVG::load(assetPlugin(plugin, "res/plainviewer.svg")));
 
 	box.size = Vec(40 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
-
 	{
-		SVGPanel *panel = new SVGPanel();
-		panel->box.size = box.size;
-		panel->setBackground(SVG::load(assetPlugin(plugin, "res/plainviewer.svg")));
-		addChild(panel);
-
-		addChild(module->preview(Vec(120,0)));
+		ViewerDisplay* view = new ViewerDisplay();
+		view->module = module;
+		view->spriteSize = Vec(500, 380);
+		view->spriteOffset = Vec(120,0);
+		addChild(view);
 	}
 
-	addInput(createInput<PJ301MPort>(Vec(50, 160), module, PlainViewer::SRC_INPUT));
-	addOutput(createOutput<PJ301MPort>(Vec(50, 280), module, PlainViewer::REF_OUTPUT));
+	addInput(Port::create<PJ301MPort>(Vec(50, 160), Port::INPUT, module, PlainViewer::SRC_INPUT));
+	addOutput(Port::create<PJ301MPort>(Vec(50, 280), Port::OUTPUT, module, PlainViewer::REF_OUTPUT));
 };
+
+Model *modelPlainViewer = Model::create<PlainViewer, PlainViewerWidget>("VSynth", "PlainViewer", "Plain Viewer", VISUAL_TAG);
