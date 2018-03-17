@@ -43,16 +43,17 @@ struct ViewerDisplay : SpriteWidget {
 void ViewerDisplay::draw(NVGcontext *vg) {
 	int width, height;
 	nvgImageSize(vg, module->texture, &width, &height);
-	int stride = width / spriteSize.x;
-	if (stride == 0) {
-		warn("Size of SpriteWidget is %d, %d but spriteSize is %f, %f", width, height, spriteSize.x, spriteSize.y);
-		return;
-	}
-	Vec offset = Vec((index % stride) * spriteSize.x, (index / stride) * spriteSize.y);
-	NVGpaint paint = nvgImagePattern(vg, spriteOffset.x - offset.x, spriteOffset.y - offset.y, width, height, 0.0,  module->texture, 1.0);
+	nvgScale(vg, spriteSize.x/width, spriteSize.y/height);
+
+	float newOffsetX, newOffsetY;
+	newOffsetX = spriteOffset.x * (width/spriteSize.x);
+	newOffsetY = spriteOffset.y * (height/spriteSize.y);
+
+	NVGpaint paint = nvgImagePattern(vg, newOffsetX, newOffsetY, (float) width, (float) height, 0.0,  module->texture, 1.0);
 	nvgFillPaint(vg, paint);
+
 	nvgBeginPath(vg);
-	nvgRect(vg, spriteOffset.x, spriteOffset.y, spriteSize.x, spriteSize.y);
+	nvgRect(vg, newOffsetX, newOffsetY,(float) width, (float) height);
 	nvgFill(vg);
 };
 
