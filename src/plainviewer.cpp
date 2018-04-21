@@ -1,4 +1,4 @@
-#include "vsynth.hpp"
+#include "vela.hpp"
 
 /**
  	A Module for viewing things
@@ -18,6 +18,8 @@ struct PlainViewer : Module {
 	enum LightIds {
 		NUM_LIGHTS
 	};
+
+	Shader* shader;
 	
 	int texture; // empty image base
 
@@ -43,6 +45,7 @@ struct ViewerDisplay : SpriteWidget {
 void ViewerDisplay::draw(NVGcontext *vg) {
 	int width, height;
 	nvgImageSize(vg, module->texture, &width, &height);
+
 	nvgScale(vg, spriteSize.x/width, spriteSize.y/height);
 
 	float newOffsetX, newOffsetY;
@@ -73,8 +76,11 @@ PlainViewerWidget::PlainViewerWidget(PlainViewer *module) : ModuleWidget(module)
 		addChild(view);
 	}
 
+	module->shader = new Shader(assetPlugin(plugin, "res/shaders/v_shader.glsl"), assetPlugin(plugin, "res/shaders/f_shader.glsl"));
+
+	module->shader->startShader();
 	addInput(Port::create<PJ301MPort>(Vec(50, 160), Port::INPUT, module, PlainViewer::SRC_INPUT));
 	addOutput(Port::create<PJ301MPort>(Vec(50, 280), Port::OUTPUT, module, PlainViewer::REF_OUTPUT));
 };
 
-Model *modelPlainViewer = Model::create<PlainViewer, PlainViewerWidget>("VSynth", "PlainViewer", "Plain Viewer", VISUAL_TAG);
+Model *modelPlainViewer = Model::create<PlainViewer, PlainViewerWidget>("Vela", "PlainViewer", "Plain Viewer", VISUAL_TAG);

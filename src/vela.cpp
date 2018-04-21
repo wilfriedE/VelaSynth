@@ -1,4 +1,4 @@
-#include "vsynth.hpp"
+#include "vela.hpp"
 
 // The plugin-wide instance of the Plugin class
 Plugin *plugin;
@@ -11,11 +11,12 @@ void init(rack::Plugin *p) {
 	// The ZIP package must only contain one folder, with the name equal to the plugin's slug.
 	p->slug = TOSTRING(SLUG);
 	p->version = TOSTRING(VERSION);
-	p->website = "https://github.com/VCVRack/Template";
-	p->manual = "https://github.com/VCVRack/Template/blob/master/README.md";
+	p->website = "https://github.com/wilfriedE/VelaSynth";
+	p->manual = "https://github.com/wilfriedE/VelaSynth/blob/master/README.md";
 
-	p->addModel(modelImageSource);
+	p->addModel(modelMediaSource);
 	p->addModel(modelPlainViewer);
+	p->addModel(modelTintFilter);
 
 	// For each module, specify the ModuleWidget subclass, manufacturer slug (for saving in patches), manufacturer human-readable name, module slug, and module name
 	// Any other plugin initialization may go here.
